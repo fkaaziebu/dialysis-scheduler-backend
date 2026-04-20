@@ -27,19 +27,6 @@ services:
     networks:
       - dialysis-scheduler-network
 
-  meilisearch:
-    image: getmeili/meilisearch:v1.16
-    container_name: meilisearch
-    restart: unless-stopped
-    environment:
-      MEILI_MASTER_KEY: 'password'
-    ports:
-      - '7700:7700'
-    volumes:
-      - ./meili_data:/meili_data
-    networks:
-      - dialysis-scheduler-network
-
   dialysis-scheduler-backend:
     image: fkaaziebu/dialysis-scheduler-backend
     container_name: dialysis-scheduler-backend
