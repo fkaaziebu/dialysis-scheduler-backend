@@ -11,7 +11,8 @@ const defaultPostgresDBConnection = (
 ): TypeOrmModuleOptions => ({
   type: 'postgres',
   autoLoadEntities: true,
-  synchronize: configService.get('NODE_ENV') !== 'production',
+  // synchronize: configService.get('NODE_ENV') !== 'production',
+  synchronize: true,
   url: configService.get('DATABASE_URL'),
   ssl: {
     rejectUnauthorized: false,
