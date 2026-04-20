@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: scheduler-db
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dialysis-scheduler-network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    networks:
+      - dialysis-scheduler-network
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.16
+    container_name: meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: 'password'
+    ports:
+      - '7700:7700'
+    volumes:
+      - ./meili_data:/meili_data
+    networks:
+      - dialysis-scheduler-network
+
+  dialysis-scheduler-backend:
+    image: fkaaziebu/dialysis-scheduler-backend
+    container_name: dialysis-scheduler-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - '4000:4000'
+    networks:
+      - dialysis-scheduler-network
+
+networks:
+  dialysis-scheduler-network:
+    driver: bridge
