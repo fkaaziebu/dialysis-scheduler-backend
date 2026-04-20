@@ -14,8 +14,11 @@ const defaultPostgresDBConnection = (
   synchronize: configService.get('NODE_ENV') !== 'production',
   url: configService.get('DATABASE_URL'),
   ssl: {
-    rejectUnauthorized: false, // allow self-signed AWS certs
+    rejectUnauthorized: false,
   },
+  migrations: ['dist/database/migrations/*.js'],
+  migrationsTableName: 'migrations',
+  migrationsRun: configService.get('NODE_ENV') === 'production',
 });
 
 const defaultRedisDBConnection = async (configService: ConfigService) => ({

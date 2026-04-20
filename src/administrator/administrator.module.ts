@@ -13,7 +13,14 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Administrator, Appointment, FacilityPatient, Patient, Physician, FacilityPhysician]),
+    TypeOrmModule.forFeature([
+      Administrator,
+      Appointment,
+      FacilityPatient,
+      Patient,
+      Physician,
+      FacilityPhysician,
+    ]),
     FacilityModule,
     AuthModule,
   ],
