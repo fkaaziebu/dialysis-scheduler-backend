@@ -61,13 +61,6 @@ export class AdministratorService {
   async registerAdministrator(
     input: RegisterAdministratorInput,
   ): Promise<Administrator> {
-    const rootExists = await this.administratorRepo.existsBy({
-      role: AdministratorRole.ROOT_ADMIN,
-    });
-    if (rootExists) {
-      throw new ConflictException('A root administrator already exists');
-    }
-
     const emailTaken = await this.administratorRepo.existsBy({
       email: input.email,
     });
@@ -180,7 +173,19 @@ export class AdministratorService {
   ): Promise<Administrator> {
     const admin = await this.administratorRepo.findOne({
       where: { id: adminId },
-      select: ['id', 'password', 'firstName', 'lastName', 'email', 'phoneNumber', 'role', 'facilityId', 'twoFactorEnabled', 'twoFactorMethod', 'createdAt'],
+      select: [
+        'id',
+        'password',
+        'firstName',
+        'lastName',
+        'email',
+        'phoneNumber',
+        'role',
+        'facilityId',
+        'twoFactorEnabled',
+        'twoFactorMethod',
+        'createdAt',
+      ],
     });
     if (!admin) throw new NotFoundException('Administrator not found');
 
@@ -208,15 +213,17 @@ export class AdministratorService {
 
     const now = new Date();
     const thisMonthStart = this.monthStart(now);
-    const thisMonthEnd = `${new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      .toISOString()
-      .split('T')[0]}T23:59:59`;
+    const thisMonthEnd = `${
+      new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        .toISOString()
+        .split('T')[0]
+    }T23:59:59`;
 
     const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthStart = this.monthStart(prevMonth);
-    const lastMonthEnd = `${new Date(now.getFullYear(), now.getMonth(), 0)
-      .toISOString()
-      .split('T')[0]}T23:59:59`;
+    const lastMonthEnd = `${
+      new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0]
+    }T23:59:59`;
 
     const [
       total,
@@ -228,14 +235,54 @@ export class AdministratorService {
       noShow,
       noShowLast,
     ] = await Promise.all([
-      this.countAppointments(undefined, thisMonthStart, thisMonthEnd, facilityId),
-      this.countAppointments(undefined, lastMonthStart, lastMonthEnd, facilityId),
-      this.countAppointments(AppointmentStatus.COMPLETED, thisMonthStart, thisMonthEnd, facilityId),
-      this.countAppointments(AppointmentStatus.COMPLETED, lastMonthStart, lastMonthEnd, facilityId),
-      this.countAppointments(AppointmentStatus.PENDING, thisMonthStart, thisMonthEnd, facilityId),
-      this.countAppointments(AppointmentStatus.PENDING, lastMonthStart, lastMonthEnd, facilityId),
-      this.countAppointments(AppointmentStatus.NO_SHOW, thisMonthStart, thisMonthEnd, facilityId),
-      this.countAppointments(AppointmentStatus.NO_SHOW, lastMonthStart, lastMonthEnd, facilityId),
+      this.countAppointments(
+        undefined,
+        thisMonthStart,
+        thisMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        undefined,
+        lastMonthStart,
+        lastMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        AppointmentStatus.COMPLETED,
+        thisMonthStart,
+        thisMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        AppointmentStatus.COMPLETED,
+        lastMonthStart,
+        lastMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        AppointmentStatus.PENDING,
+        thisMonthStart,
+        thisMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        AppointmentStatus.PENDING,
+        lastMonthStart,
+        lastMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        AppointmentStatus.NO_SHOW,
+        thisMonthStart,
+        thisMonthEnd,
+        facilityId,
+      ),
+      this.countAppointments(
+        AppointmentStatus.NO_SHOW,
+        lastMonthStart,
+        lastMonthEnd,
+        facilityId,
+      ),
     ]);
 
     return {
@@ -446,7 +493,9 @@ export class AdministratorService {
       throw new ForbiddenException('Access denied to this facility');
     }
 
-    const facility = await this.facilityRepo.findOneBy({ id: input.facilityId });
+    const facility = await this.facilityRepo.findOneBy({
+      id: input.facilityId,
+    });
     if (!facility) {
       throw new NotFoundException(`Facility ${input.facilityId} not found`);
     }
