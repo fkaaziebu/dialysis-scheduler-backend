@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { Client } from 'pg';
 import { AppModule } from './app.module';
@@ -35,12 +36,11 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigService);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://studio.apollographql.com',
-      'http://ec2-18-199-175-68.eu-central-1.compute.amazonaws.com:4000',
-    ],
+    origin: configService.get<string>('CORS_ORIGIN') || '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
